@@ -16,37 +16,59 @@
     <link rel="stylesheet" href="css/leaflet-routing-machine.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-body: #121212;
+            --bg-sidebar: #1e1e24;
+            --text-main: #f5f6fa;
+            --text-muted: #a4b0be;
+            --text-sub: #ced6e0;
+            --border-color: #2f3542;
+            --bg-input: #2f3542;
+            --hover-bg: #3a4150;
+            --shadow-color: rgba(0,0,0,0.5);
+            --shadow-heavy: rgba(0,0,0,0.5);
+            --primary: #3498db;
+            --primary-hover: #2980b9;
+        }
+
         * {
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
         }
+        
         html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
-            background: #f4f7f6;
+            background: var(--bg-body);
+            color: var(--text-main);
             overflow: hidden;
         }
+        
         .app-container {
             display: flex;
             height: 100vh;
             width: 100vw;
         }
+        
         .sidebar-left {
-            width: 280px;
-            background: #ffffff;
+            width: 300px;
+            background: var(--bg-sidebar);
             padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            box-shadow: 2px 0 10px var(--shadow-color);
             display: flex;
             flex-direction: column;
             z-index: 10000;
             position: relative;
             transition: margin-left 0.3s ease-in-out;
+            overflow-y: auto;
         }
+        
         .sidebar-left.closed {
-            margin-left: -280px;
+            margin-left: -300px;
         }
+        
         .close-left-btn {
             position: absolute;
             top: 15px;
@@ -54,35 +76,39 @@
             background: none;
             border: none;
             font-size: 20px;
-            color: #7f8c8d;
+            color: var(--text-muted);
             cursor: pointer;
         }
+        
         .close-left-btn:hover {
-            color: #e74c3c;
+            color: #ff6b81;
         }
+        
         .toggle-menu-btn {
             position: absolute;
             top: 15px;
             left: 15px;
             z-index: 9999;
-            background: white;
-            border: 2px solid rgba(0,0,0,0.2);
+            background: var(--bg-sidebar);
+            border: 2px solid var(--border-color);
             border-radius: 4px;
             padding: 8px 12px;
             cursor: pointer;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+            box-shadow: 0 1px 5px var(--shadow-color);
             font-size: 16px;
-            color: #333;
+            color: var(--text-main);
             transition: all 0.3s;
         }
+        
         .toggle-menu-btn:hover {
-            background: #f4f4f4;
+            background: var(--hover-bg);
         }
+        
         .sidebar-left h2 {
             margin-top: 0;
             font-size: 20px;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--primary);
             padding-bottom: 10px;
             margin-bottom: 20px;
             padding-right: 30px;
@@ -92,61 +118,74 @@
             margin-bottom: 15px;
             position: relative;
         }
+        
         #search-input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #dcdde1;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
             outline: none;
-            font-family: 'Poppins', sans-serif;
+            background: var(--bg-input);
+            color: var(--text-main);
             transition: border-color 0.3s;
         }
-        #search-input:focus {
-            border-color: #3498db;
+        
+        #search-input::placeholder {
+            color: var(--text-muted);
         }
+        
+        #search-input:focus {
+            border-color: var(--primary);
+        }
+        
         .search-results {
             list-style: none;
             padding: 0;
             margin: 5px 0 0 0;
             max-height: 250px;
             overflow-y: auto;
-            border: 1px solid #dcdde1;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            background: white;
+            background: var(--bg-sidebar);
             position: absolute;
             width: 100%;
             z-index: 1001;
             display: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px var(--shadow-color);
         }
+        
         .search-results li {
             padding: 10px 15px;
-            border-bottom: 1px solid #f1f2f6;
+            border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background 0.2s;
         }
+        
         .search-results li:last-child {
             border-bottom: none;
         }
+        
         .search-results li:hover {
-            background: #f8f9fa;
+            background: var(--hover-bg);
         }
+        
         .search-results li strong {
             display: block;
             font-size: 13px;
-            color: #2c3e50;
+            color: var(--text-main);
         }
+        
         .search-results li small {
             font-size: 11px;
-            color: #3498db;
+            color: var(--primary);
             font-weight: 600;
         }
 
         .menu-btn {
-            background: #ffffff;
-            color: #2c3e50;
-            border: 1px solid #dcdde1;
+            background: var(--bg-sidebar);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
             padding: 12px 15px;
             border-radius: 8px;
             cursor: pointer;
@@ -160,25 +199,68 @@
             align-items: center;
             gap: 10px;
         }
+        
         .menu-btn:hover {
-            background: #f8f9fa;
-            border-color: #3498db;
-            color: #3498db;
+            background: var(--hover-bg);
+            border-color: var(--primary);
+            color: var(--primary);
         }
+
+        .layer-control-container {
+            margin-top: 15px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .layer-control-container .leaflet-control-layers {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .layer-control-container .leaflet-control-layers-expanded {
+            padding: 0;
+        }
+        
+        .layer-control-container label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .layer-control-container input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .layer-control-container img {
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        
         .map-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
+        
         #map {
             width: 100%;
             height: 100%;
             z-index: 1;
         }
+        
         .sidebar-right {
             width: 350px;
-            background: #ffffff;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            background: var(--bg-sidebar);
+            box-shadow: -5px 0 15px var(--shadow-heavy);
             z-index: 99999;
             display: flex;
             flex-direction: column;
@@ -188,70 +270,84 @@
             height: 100%;
             transition: right 0.3s ease-in-out;
         }
+        
         .sidebar-right.active {
             right: 0;
         }
+        
         .info-header {
             padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #eee;
+            background: var(--hover-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        
         .info-header h3 {
             margin: 0;
             font-size: 16px;
-            color: #2c3e50;
+            color: var(--text-main);
         }
+        
         .close-btn {
             background: none;
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: #7f8c8d;
+            color: var(--text-muted);
             padding: 0;
             line-height: 1;
         }
+        
+        .close-btn:hover {
+            color: #ff6b81;
+        }
+        
         .info-body {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
         }
+        
         .info-image {
             width: 100%;
             height: 180px;
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 15px;
-            background: #eee;
+            background: var(--bg-input);
         }
+        
         .info-title {
             font-size: 18px;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text-main);
             margin: 0 0 5px 0;
         }
+        
         .info-type {
             font-size: 13px;
-            color: #3498db;
+            color: #fff;
             font-weight: 600;
             margin-bottom: 15px;
             display: inline-block;
-            background: #e1f0fa;
+            background: var(--primary);
             padding: 4px 10px;
             border-radius: 20px;
         }
+        
         .info-detail {
             font-size: 14px;
-            color: #555;
+            color: var(--text-sub);
             margin-bottom: 10px;
             line-height: 1.5;
             display: flex;
             gap: 10px;
         }
+        
         .btn-rute {
-            background: #3498db;
+            background: var(--primary);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -263,9 +359,11 @@
             font-weight: 600;
             transition: background 0.3s;
         }
+        
         .btn-rute:hover { 
-            background: #2980b9; 
+            background: var(--primary-hover); 
         }
+        
         .leaflet-top.leaflet-left {
             padding-top: 60px;
         }
@@ -288,8 +386,8 @@
             </button>
             
             <div style="margin-top: 20px;">
-                <p style="font-size: 13px; color: #7f8c8d; font-weight: 600; text-transform: uppercase;">Informasi</p>
-                <p style="font-size: 12px; color: #555; line-height: 1.6;">Gunakan kolom pencarian di atas, atau klik ikon di peta untuk melihat detail informasi di panel kanan.</p>
+                <p style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Lapisan Peta</p>
+                <div id="layer-control-container" class="layer-control-container"></div>
             </div>
         </nav>
         <main class="map-wrapper">
@@ -434,7 +532,7 @@
                 <span class="info-type">${type}</span>
                 
                 <div class="info-detail">
-                    <i class="fas fa-phone-alt" style="margin-top:3px; color:#7f8c8d;"></i>
+                    <i class="fas fa-phone-alt" style="margin-top:3px; color:var(--text-muted);"></i>
                     <span>${phone}</span>
                 </div>
                 <div class="info-detail">
@@ -561,7 +659,7 @@
             });
             var n = feature.properties['NAMOBJ'] !== null ? String(feature.properties['NAMOBJ']) : '';
             var k = feature.properties['WADMKC'] !== null ? String(feature.properties['WADMKC']) : '';
-            layer.bindPopup('<div style="text-align:center; padding: 5px;"><strong style="font-size:1.1em;">' + n + '</strong><br><span style="color:#555;">Kecamatan: ' + k + '</span></div>', { maxHeight: 400 });
+            layer.bindPopup('<div style="text-align:center; padding: 5px;"><strong style="font-size:1.1em;">' + n + '</strong><br><span style="color:#ced6e0;">Kecamatan: ' + k + '</span></div>', { maxHeight: 400 });
         }
 
         function style_AdministrasiPekanbaru_3_0() {
@@ -684,10 +782,14 @@
             { label: "Satelit Google", layer: layer_SatelitGoogle_0 },]
         
         var lay = L.control.layers.tree(null, overlaysTree, {
-            collapsed: true,
-            position: 'topleft'
+            collapsed: false
         });
         lay.addTo(map);
+
+        var layerControlElement = lay.getContainer();
+        layerControlElement.classList.remove('leaflet-control');
+        document.getElementById('layer-control-container').appendChild(layerControlElement);
+
         setBounds();
 
         var searchData = [];
@@ -751,7 +853,7 @@
             } else {
                 resultsContainer.style.display = 'block';
                 var li = document.createElement('li');
-                li.innerHTML = '<small>Tidak ada hasil yang cocok.</small>';
+                li.innerHTML = '<small style="color: var(--text-muted);">Tidak ada hasil yang cocok.</small>';
                 resultsContainer.appendChild(li);
             }
         }
