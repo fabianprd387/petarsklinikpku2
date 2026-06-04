@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,7 +20,6 @@
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
         }
-
         html, body {
             width: 100%;
             height: 100%;
@@ -30,13 +28,11 @@
             background: #f4f7f6;
             overflow: hidden;
         }
-
         .app-container {
             display: flex;
             height: 100vh;
             width: 100vw;
         }
-
         .sidebar-left {
             width: 280px;
             background: #ffffff;
@@ -46,7 +42,6 @@
             flex-direction: column;
             z-index: 10000;
         }
-
         .sidebar-left h2 {
             margin-top: 0;
             font-size: 20px;
@@ -55,7 +50,6 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-
         .menu-btn {
             background: #ffffff;
             color: #2c3e50;
@@ -73,48 +67,37 @@
             align-items: center;
             gap: 10px;
         }
-
         .menu-btn:hover {
             background: #f8f9fa;
             border-color: #3498db;
             color: #3498db;
         }
-
-        .menu-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-
         .map-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
         }
-
         #map {
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
-
         .sidebar-right {
             width: 350px;
             background: #ffffff;
-            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
-            z-index: 9999;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            z-index: 99999;
             display: flex;
             flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
             position: absolute;
-            right: 0;
+            top: 0;
+            right: -360px;
             height: 100%;
+            transition: right 0.3s ease-in-out;
         }
-
         .sidebar-right.active {
-            transform: translateX(0);
+            right: 0;
         }
-
         .info-header {
             padding: 20px;
             background: #f8f9fa;
@@ -123,27 +106,25 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .info-header h3 {
             margin: 0;
             font-size: 16px;
             color: #2c3e50;
         }
-
         .close-btn {
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             color: #7f8c8d;
+            padding: 0;
+            line-height: 1;
         }
-
         .info-body {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
         }
-
         .info-image {
             width: 100%;
             height: 180px;
@@ -152,14 +133,12 @@
             margin-bottom: 15px;
             background: #eee;
         }
-
         .info-title {
             font-size: 18px;
             font-weight: 600;
             color: #2c3e50;
             margin: 0 0 5px 0;
         }
-
         .info-type {
             font-size: 13px;
             color: #3498db;
@@ -170,7 +149,6 @@
             padding: 4px 10px;
             border-radius: 20px;
         }
-
         .info-detail {
             font-size: 14px;
             color: #555;
@@ -179,7 +157,6 @@
             display: flex;
             gap: 10px;
         }
-
         .btn-rute {
             background: #3498db;
             color: white;
@@ -193,32 +170,26 @@
             font-weight: 600;
             transition: background 0.3s;
         }
-
         .btn-rute:hover { 
             background: #2980b9; 
         }
     </style>
     <title></title>
 </head>
-
 <body>
     <div class="app-container">
         <nav class="sidebar-left">
             <h2>Peta Medis</h2>
-            
             <button class="menu-btn" onclick="resetLocation()">
                 <i class="fas fa-crosshairs"></i> Kembali ke Lokasi Saya
             </button>
-            
             <div style="margin-top: 20px;">
                 <p style="font-size: 13px; color: #7f8c8d; font-weight: 600; text-transform: uppercase;">Informasi</p>
-                <p style="font-size: 12px; color: #555; line-height: 1.6;">Klik pada ikon Rumah Sakit atau Klinik di peta untuk melihat detail informasi dan membuat rute perjalanan.</p>
+                <p style="font-size: 12px; color: #555; line-height: 1.6;">Klik pada ikon Rumah Sakit atau Klinik di peta untuk melihat detail informasi di panel kanan, lalu buat rute perjalanan.</p>
             </div>
         </nav>
-
         <main class="map-wrapper">
             <div id="map"></div>
-            
             <aside class="sidebar-right" id="info-panel">
                 <div class="info-header">
                     <h3>Detail Lokasi</h3>
@@ -272,20 +243,6 @@
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({ truncate: { length: 30, location: 'smart' } });
-
-        function removeEmptyRowsFromPopupContent(content, feature) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var rows = tempDiv.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var td = rows[i].querySelector('td.visible-with-data');
-                var key = td ? td.id : '';
-                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                    rows[i].parentNode.removeChild(rows[i]);
-                }
-            }
-            return tempDiv.innerHTML;
-        }
 
         var routingControl = null;
         var userMarker = null;
@@ -359,7 +316,7 @@
             }
 
             content.innerHTML = `
-                <img src="${imgSrc}" class="info-image" alt="${title}">
+                <img src="${imgSrc}" class="info-image" alt="Gambar">
                 <h2 class="info-title">${title}</h2>
                 <span class="info-type">${type}</span>
                 
@@ -489,12 +446,9 @@
                 },
                 mouseover: highlightFeature,
             });
-            var popupContent = '<div style="text-align:center; padding: 5px;">\
-                    <strong style="font-size:1.1em;">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(String(feature.properties['NAMOBJ']).replace(/'/g, '\'').toLocaleString()) : '') + '</strong><br>\
-                    <span style="color:#555;">Kecamatan: ' + (feature.properties['WADMKC'] !== null ? autolinker.link(String(feature.properties['WADMKC']).replace(/'/g, '\'').toLocaleString()) : '') + '</span>\
-                </div>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.bindPopup(content, { maxHeight: 400 });
+            var n = feature.properties['NAMOBJ'] !== null ? String(feature.properties['NAMOBJ']) : '';
+            var k = feature.properties['WADMKC'] !== null ? String(feature.properties['WADMKC']) : '';
+            layer.bindPopup('<div style="text-align:center; padding: 5px;"><strong style="font-size:1.1em;">' + n + '</strong><br><span style="color:#555;">Kecamatan: ' + k + '</span></div>', { maxHeight: 400 });
         }
 
         function style_AdministrasiPekanbaru_3_0() {
@@ -518,6 +472,8 @@
         map.addLayer(layer_AdministrasiPekanbaru_3);
         
         function pop_Klinik_4(feature, layer) {
+            var title = feature.properties['Nama Klinik'] || '-';
+            layer.bindPopup("<b>" + title + "</b>");
             layer.on({
                 mouseout: function (e) {
                     for (var i in e.target._eventParents) {
@@ -528,12 +484,9 @@
                 },
                 mouseover: highlightFeature,
                 click: function(e) {
-                    if (e.originalEvent) {
-                        e.originalEvent.stopPropagation();
-                    }
-                    var lat = feature.properties['Y'] || feature.geometry.coordinates[1];
-                    var lng = feature.properties['X'] || feature.geometry.coordinates[0];
-                    var title = feature.properties['Nama Klinik'] || '-';
+                    L.DomEvent.stopPropagation(e);
+                    var lat = feature.geometry.coordinates[1];
+                    var lng = feature.geometry.coordinates[0];
                     var phone = feature.properties['No.telp'] || '-';
                     var address = feature.properties['Alamat'] || '-';
                     openSidebarInfo(title, 'Klinik', phone, address, lat, lng);
@@ -564,6 +517,8 @@
         map.addLayer(layer_Klinik_4);
         
         function pop_RumahSakit_5(feature, layer) {
+            var title = feature.properties['Nama Rumah Sakit'] || '-';
+            layer.bindPopup("<b>" + title + "</b>");
             layer.on({
                 mouseout: function (e) {
                     for (var i in e.target._eventParents) {
@@ -574,12 +529,9 @@
                 },
                 mouseover: highlightFeature,
                 click: function(e) {
-                    if (e.originalEvent) {
-                        e.originalEvent.stopPropagation();
-                    }
-                    var lat = feature.properties['Koordinat Y'] || feature.geometry.coordinates[1];
-                    var lng = feature.properties['Koordinat X'] || feature.geometry.coordinates[0];
-                    var title = feature.properties['Nama Rumah Sakit'] || '-';
+                    L.DomEvent.stopPropagation(e);
+                    var lat = feature.geometry.coordinates[1];
+                    var lng = feature.geometry.coordinates[0];
                     var phone = feature.properties['Kontak'] || '-';
                     var address = feature.properties['Alamat'] || '-';
                     var jenis = feature.properties['Jenis'] || 'Rumah Sakit';
@@ -624,10 +576,6 @@
         lay.addTo(map);
         setBounds();
         
-        map.on('click', function() {
-            closeSidebar();
-        });
     </script>
 </body>
-
-</html>
+</html> 
