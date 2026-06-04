@@ -206,6 +206,16 @@
             color: var(--primary);
         }
 
+        #btn-hapus-rute {
+            color: #ff6b81;
+            border-color: #ff6b81;
+        }
+
+        #btn-hapus-rute:hover {
+            background: #ff6b81;
+            color: #fff;
+        }
+
         .layer-control-container {
             margin-top: 15px;
             background: var(--bg-input);
@@ -213,18 +223,17 @@
             border-radius: 8px;
             padding: 10px;
             font-size: 13px;
-        }
-
-        .layer-control-container .leaflet-control-layers {
-            background: transparent;
-            border: none;
-            box-shadow: none;
             color: var(--text-main);
-            margin: 0;
-            padding: 0;
         }
 
-        .layer-control-container .leaflet-control-layers-expanded {
+        .layer-control-container .leaflet-control-layers,
+        .layer-control-container .leaflet-control-layers-expanded,
+        .layer-control-container .leaflet-control-layers-list {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: var(--text-main) !important;
+            margin: 0;
             padding: 0;
         }
         
@@ -234,6 +243,7 @@
             gap: 8px;
             margin-bottom: 8px;
             cursor: pointer;
+            color: var(--text-main) !important;
         }
 
         .layer-control-container input[type="checkbox"] {
@@ -385,6 +395,10 @@
                 <i class="fas fa-crosshairs"></i> Kembali ke Lokasi Saya
             </button>
             
+            <button class="menu-btn" id="btn-hapus-rute" onclick="hapusRute()" style="display: none;">
+                <i class="fas fa-eraser"></i> Hapus Rute
+            </button>
+
             <div style="margin-top: 20px;">
                 <p style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Lapisan Peta</p>
                 <div id="layer-control-container" class="layer-control-container"></div>
@@ -457,6 +471,18 @@
                 map.invalidateSize();
             }, 300);
         }
+
+        function hapusRute() {
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            if (userMarker) {
+                map.removeLayer(userMarker);
+                userMarker = null;
+            }
+            document.getElementById('btn-hapus-rute').style.display = 'none';
+        }
         
         function ruteKe(lat, lng) {
             if (routingControl) {
@@ -472,15 +498,27 @@
             
             navigator.geolocation.getCurrentPosition(
                 function(position) {
+                    var userLat = position.coords.latitude;
+                    var userLng = position.coords.longitude;
+                    
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    userMarker = L.marker([userLat, userLng]).addTo(map)
+                        .bindPopup("<b>Lokasi Anda Saat Ini</b>");
+                        
                     routingControl = L.Routing.control({
                         waypoints: [
-                            L.latLng(position.coords.latitude, position.coords.longitude),
+                            L.latLng(userLat, userLng),
                             L.latLng(lat, lng)
                         ],
                         routeWhileDragging: false,
                         show: true,
-                        collapsible: true
+                        collapsible: true,
+                        createMarker: function() { return null; }
                     }).addTo(map);
+
+                    document.getElementById('btn-hapus-rute').style.display = 'flex';
                 },
                 function() {
                     alert("Gagal mendapatkan lokasi Anda. Pastikan izin lokasi diaktifkan.");
