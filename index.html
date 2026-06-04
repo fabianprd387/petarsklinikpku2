@@ -44,7 +44,7 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            z-index: 1000;
+            z-index: 10000;
         }
 
         .sidebar-left h2 {
@@ -89,6 +89,7 @@
         .map-wrapper {
             flex: 1;
             position: relative;
+            overflow: hidden;
         }
 
         #map {
@@ -99,8 +100,8 @@
         .sidebar-right {
             width: 350px;
             background: #ffffff;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
-            z-index: 1000;
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             transform: translateX(100%);
@@ -197,6 +198,7 @@
             background: #2980b9; 
         }
     </style>
+    <title></title>
 </head>
 
 <body>
@@ -423,9 +425,6 @@
                 },
                 mouseover: highlightFeature,
             });
-            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr></table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_jalan_1_0() {
@@ -458,9 +457,6 @@
                 },
                 mouseover: highlightFeature,
             });
-            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(String(feature.properties['NAMOBJ']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr></table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_Jalanutama_2_0() {
@@ -532,6 +528,9 @@
                 },
                 mouseover: highlightFeature,
                 click: function(e) {
+                    if (e.originalEvent) {
+                        e.originalEvent.stopPropagation();
+                    }
                     var lat = feature.properties['Y'] || feature.geometry.coordinates[1];
                     var lng = feature.properties['X'] || feature.geometry.coordinates[0];
                     var title = feature.properties['Nama Klinik'] || '-';
@@ -540,7 +539,6 @@
                     openSidebarInfo(title, 'Klinik', phone, address, lat, lng);
                 }
             });
-            layer.bindPopup("<b>" + (feature.properties['Nama Klinik'] || '-') + "</b>");
         }
 
         function style_Klinik_4_0() {
@@ -576,6 +574,9 @@
                 },
                 mouseover: highlightFeature,
                 click: function(e) {
+                    if (e.originalEvent) {
+                        e.originalEvent.stopPropagation();
+                    }
                     var lat = feature.properties['Koordinat Y'] || feature.geometry.coordinates[1];
                     var lng = feature.properties['Koordinat X'] || feature.geometry.coordinates[0];
                     var title = feature.properties['Nama Rumah Sakit'] || '-';
@@ -585,7 +586,6 @@
                     openSidebarInfo(title, jenis, phone, address, lat, lng);
                 }
             });
-            layer.bindPopup("<b>" + (feature.properties['Nama Rumah Sakit'] || '-') + "</b>");
         }
 
         function style_RumahSakit_5_0() {
