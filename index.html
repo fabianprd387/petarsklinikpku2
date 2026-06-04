@@ -87,6 +87,62 @@
             margin-bottom: 20px;
             padding-right: 30px;
         }
+        
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        #search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s;
+        }
+        #search-input:focus {
+            border-color: #3498db;
+        }
+        .search-results {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            background: white;
+            position: absolute;
+            width: 100%;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .search-results li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f2f6;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-results li:last-child {
+            border-bottom: none;
+        }
+        .search-results li:hover {
+            background: #f8f9fa;
+        }
+        .search-results li strong {
+            display: block;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+        .search-results li small {
+            font-size: 11px;
+            color: #3498db;
+            font-weight: 600;
+        }
+
         .menu-btn {
             background: #ffffff;
             color: #2c3e50;
@@ -210,7 +266,6 @@
         .btn-rute:hover { 
             background: #2980b9; 
         }
-        /* Mendorong semua kontrol di kiri atas ke bawah agar tidak tertimpa tombol menu */
         .leaflet-top.leaflet-left {
             padding-top: 60px;
         }
@@ -222,12 +277,19 @@
         <nav class="sidebar-left" id="sidebar-left">
             <button class="close-left-btn" onclick="toggleLeftSidebar()"><i class="fas fa-times"></i></button>
             <h2>Peta Medis</h2>
+            
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Cari RS / Klinik..." onkeyup="performSearch(this.value)" autocomplete="off">
+                <ul id="search-results" class="search-results"></ul>
+            </div>
+
             <button class="menu-btn" onclick="resetLocation()">
                 <i class="fas fa-crosshairs"></i> Kembali ke Lokasi Saya
             </button>
+            
             <div style="margin-top: 20px;">
                 <p style="font-size: 13px; color: #7f8c8d; font-weight: 600; text-transform: uppercase;">Informasi</p>
-                <p style="font-size: 12px; color: #555; line-height: 1.6;">Klik pada ikon Rumah Sakit atau Klinik di peta untuk melihat detail informasi di panel kanan, lalu buat rute perjalanan.</p>
+                <p style="font-size: 12px; color: #555; line-height: 1.6;">Gunakan kolom pencarian di atas, atau klik ikon di peta untuk melihat detail informasi di panel kanan.</p>
             </div>
         </nav>
         <main class="map-wrapper">
@@ -621,13 +683,86 @@
             { label: '<img src="legend/jalan_1.png" /> jalan', layer: layer_jalan_1 },
             { label: "Satelit Google", layer: layer_SatelitGoogle_0 },]
         
-        // Pindahkan layer control ke kiri atas (di bawah tombol zoom)
         var lay = L.control.layers.tree(null, overlaysTree, {
             collapsed: true,
             position: 'topleft'
         });
         lay.addTo(map);
         setBounds();
+
+        var searchData = [];
+        
+        if (typeof json_Klinik_4 !== 'undefined') {
+            json_Klinik_4.features.forEach(function(f) {
+                searchData.push({
+                    name: f.properties['Nama Klinik'] || '-',
+                    type: 'Klinik',
+                    phone: f.properties['No.telp'] || '-',
+                    address: f.properties['Alamat'] || '-',
+                    lat: f.properties['Y'] || f.geometry.coordinates[1],
+                    lng: f.properties['X'] || f.geometry.coordinates[0]
+                });
+            });
+        }
+        
+        if (typeof json_RumahSakit_5 !== 'undefined') {
+            json_RumahSakit_5.features.forEach(function(f) {
+                searchData.push({
+                    name: f.properties['Nama Rumah Sakit'] || '-',
+                    type: f.properties['Jenis'] || 'Rumah Sakit',
+                    phone: f.properties['Kontak'] || '-',
+                    address: f.properties['Alamat'] || '-',
+                    lat: f.properties['Koordinat Y'] || f.geometry.coordinates[1],
+                    lng: f.properties['Koordinat X'] || f.geometry.coordinates[0]
+                });
+            });
+        }
+
+        function performSearch(query) {
+            var resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+            
+            if(query.trim() === '') {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            var lowerQuery = query.toLowerCase();
+            var matched = searchData.filter(function(item) {
+                return item.name.toLowerCase().indexOf(lowerQuery) !== -1;
+            });
+            
+            if(matched.length > 0) {
+                resultsContainer.style.display = 'block';
+                matched.forEach(function(item) {
+                    var li = document.createElement('li');
+                    li.innerHTML = '<strong>' + item.name + '</strong><small>' + item.type + '</small>';
+                    li.onclick = function() {
+                        map.flyTo([item.lat, item.lng], 17, {
+                            animate: true,
+                            duration: 1.5
+                        });
+                        openSidebarInfo(item.name, item.type, item.phone, item.address, item.lat, item.lng);
+                        document.getElementById('search-input').value = item.name;
+                        resultsContainer.style.display = 'none';
+                    };
+                    resultsContainer.appendChild(li);
+                });
+            } else {
+                resultsContainer.style.display = 'block';
+                var li = document.createElement('li');
+                li.innerHTML = '<small>Tidak ada hasil yang cocok.</small>';
+                resultsContainer.appendChild(li);
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            var container = document.querySelector('.search-container');
+            var resultsContainer = document.getElementById('search-results');
+            if (!container.contains(event.target)) {
+                resultsContainer.style.display = 'none';
+            }
+        });
         
     </script>
 </body>
