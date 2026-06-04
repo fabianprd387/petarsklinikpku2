@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/fontawesome-all.min.css">
     <link rel="stylesheet" href="css/leaflet.photon.css">
     <link rel="stylesheet" href="css/leaflet-measure.css">
+    <link rel="stylesheet" href="css/leaflet-routing-machine.css">
     <style>
         html,
         body,
@@ -23,6 +24,18 @@
             padding: 0;
             margin: 0;
         }
+        .btn-rute {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        .btn-rute:hover { background: #1d4ed8; }
     </style>
     <title></title>
 </head>
@@ -48,6 +61,7 @@
     <script src="data/AdministrasiPekanbaru_3.js"></script>
     <script src="data/Klinik_4.js"></script>
     <script src="data/RumahSakit_5.js"></script>
+    <script src="js/leaflet-routing-machine.min.js"></script>
     <script>
         var highlightLayer;
         function highlightFeature(e) {
@@ -73,7 +87,7 @@
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({ truncate: { length: 30, location: 'smart' } });
-        // remove popup's row if "visible-with-data"
+        
         function removeEmptyRowsFromPopupContent(content, feature) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -87,7 +101,7 @@
             }
             return tempDiv.innerHTML;
         }
-        // modify popup if contains media
+        
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -119,7 +133,6 @@
                     video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
                     video.addEventListener('loadedmetadata', function () {
                         popup.update();
                     });
@@ -134,6 +147,35 @@
                 popup._contentNode.classList.remove('media');
             }
         }
+
+        var routingControl = null;
+        function ruteKe(lat, lng) {
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            if (!navigator.geolocation) {
+                alert("Browser Anda tidak mendukung geolocation.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(position.coords.latitude, position.coords.longitude),
+                            L.latLng(lat, lng)
+                        ],
+                        routeWhileDragging: false,
+                        show: true,
+                        collapsible: true
+                    }).addTo(map);
+                },
+                function() {
+                    alert("Gagal mendapatkan lokasi Anda. Pastikan izin lokasi diaktifkan.");
+                }
+            );
+        }
+
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
@@ -548,6 +590,9 @@
                         <td colspan="2">' + (feature.properties['Alamat'] !== null ? autolinker.link(String(feature.properties['Alamat']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
+            var lat = feature.properties['Y'] || feature.geometry.coordinates[1];
+            var lng = feature.properties['X'] || feature.geometry.coordinates[0];
+            popupContent += '<button class="btn-rute" onclick="ruteKe(' + lat + ',' + lng + ')">🗺️ Rute ke sini</button>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
             layer.on('popupopen', function (e) {
                 addClassToPopupIfMedia(content, e.popup);
@@ -618,6 +663,9 @@
                         <td colspan="2">' + (feature.properties['Alamat'] !== null ? autolinker.link(String(feature.properties['Alamat']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
+            var lat = feature.properties['Koordinat Y'] || feature.geometry.coordinates[1];
+            var lng = feature.properties['Koordinat X'] || feature.geometry.coordinates[0];
+            popupContent += '<button class="btn-rute" onclick="ruteKe(' + lat + ',' + lng + ')">🗺️ Rute ke sini</button>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
             layer.on('popupopen', function (e) {
                 addClassToPopupIfMedia(content, e.popup);
@@ -665,12 +713,6 @@
             { label: '<img src="legend/jalan_1.png" /> jalan', layer: layer_jalan_1 },
             { label: "Satelit Google", layer: layer_SatelitGoogle_0 },]
         var lay = L.control.layers.tree(null, overlaysTree, {
-            //namedToggle: true,
-            //selectorBack: false,
-            //closedSymbol: '&#8862; &#x1f5c0;',
-            //openedSymbol: '&#8863; &#x1f5c1;',
-            //collapseAll: 'Collapse all',
-            //expandAll: 'Expand all',
             collapsed: true,
         });
         lay.addTo(map);
